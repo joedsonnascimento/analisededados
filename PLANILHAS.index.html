@@ -18,10 +18,10 @@
         <aside class="w-64 bg-slate-800 text-white p-6 shadow-xl">
             <h2 class="text-xl font-bold mb-8 border-b border-slate-700 pb-4">Menu de Navegação</h2>
             <nav class="space-y-2">
-                <button onclick="switchEntity('Artigo')" id="btn-Artigo" class="w-full text-left p-3 rounded hover:bg-slate-700 transition active-btn">Artigo</button>
-                <button onclick="switchEntity('Autores')" id="btn-Autores" class="w-full text-left p-3 rounded hover:bg-slate-700 transition">Autores</button>
-                <button onclick="switchEntity('Palavras Chave')" id="btn-Palavras" class="w-full text-left p-3 rounded hover:bg-slate-700 transition">Palavras Chave</button>
-                <button onclick="switchEntity('Referências')" id="btn-Referencias" class="w-full text-left p-3 rounded hover:bg-slate-700 transition">Referências</button>
+                <button onclick="switchEntity('Artigo')" id="nav-Artigo" class="w-full text-left p-3 rounded hover:bg-slate-700 transition active-btn">Artigo</button>
+                <button onclick="switchEntity('Autores')" id="nav-Autores" class="w-full text-left p-3 rounded hover:bg-slate-700 transition">Autores</button>
+                <button onclick="switchEntity('Palavras Chave')" id="nav-Palavras" class="w-full text-left p-3 rounded hover:bg-slate-700 transition">Palavras Chave</button>
+                <button onclick="switchEntity('Referências')" id="nav-Referências" class="w-full text-left p-3 rounded hover:bg-slate-700 transition">Referências</button>
             </nav>
         </aside>
 
@@ -38,27 +38,19 @@
                     <button onclick="switchTab('inserir')" id="tab-btn-inserir" class="py-2 px-4 border-transparent border-b-2 hover:text-blue-600 transition">➕ Inserir</button>
                 </div>
 
-                <!-- Conteúdo Listar -->
                 <div id="tab-listar" class="tab-content active">
                     <div class="overflow-x-auto">
                         <table class="min-w-full bg-white">
                             <thead class="bg-gray-50 border-b">
-                                <tr id="table-head">
-                                    <!-- Preenchido via JS -->
-                                </tr>
+                                <tr id="table-head"></tr>
                             </thead>
-                            <tbody id="table-body" class="divide-y">
-                                <!-- Preenchido via JS -->
-                            </tbody>
+                            <tbody id="table-body" class="divide-y"></tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Conteúdo Inserir -->
                 <div id="tab-inserir" class="tab-content">
-                    <form id="crud-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Campos dinâmicos via JS -->
-                    </form>
+                    <form id="crud-form" class="grid grid-cols-1 md:grid-cols-2 gap-4"></form>
                     <button onclick="saveData()" class="mt-6 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">Salvar Registro</button>
                 </div>
             </div>
@@ -66,20 +58,25 @@
     </div>
 
     <script>
-        // Simulação de Banco de Dados baseada no arquivo ATIVIDADE JOEDSON.jpg
-        let db = {
-            "Artigo": [],
-            "Autores": [],
-            "Palavras Chave": [],
-            "Referências": []
-        };
-
+        let db = { "Artigo": [], "Autores": [], "Palavras Chave": [], "Referências": [] };
         let currentEntity = "Artigo";
+
+        const fieldsMap = {
+            "Artigo": ["titulo", "ano", "sourche_title", "qt_citacoes", "doi", "issn", "link"],
+            "Autores": ["Nome"],
+            "Palavras Chave": ["Palavras_Chaves"],
+            "Referências": ["Referencia"]
+        };
 
         function switchEntity(entity) {
             currentEntity = entity;
             document.querySelectorAll('aside button').forEach(btn => btn.classList.remove('active-btn'));
-            document.getElementById(`btn-${entity === 'Palavras Chave' ? 'Palavras' : entity === 'Referências' ? 'Referencias' : entity}`).classList.add('active-btn');
+            
+            // Simplificado para evitar erros de ID
+            const safeId = "nav-" + entity.replace(" Chave", ""); 
+            const btn = document.getElementById("nav-" + entity);
+            if(btn) btn.classList.add('active-btn');
+
             document.getElementById('current-title').innerText = `Gerenciar ${entity}`;
             renderForm();
             renderTable();
@@ -89,45 +86,26 @@
         function switchTab(tab) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(`tab-${tab}`).classList.add('active');
-            
-            document.querySelectorAll('[id^="tab-btn-"]').forEach(b => {
-                b.classList.remove('border-blue-600', 'text-blue-600');
-                b.classList.add('border-transparent');
-            });
+            document.querySelectorAll('[id^="tab-btn-"]').forEach(b => b.classList.remove('border-blue-600', 'text-blue-600'));
             document.getElementById(`tab-btn-${tab}`).classList.add('border-blue-600', 'text-blue-600');
         }
 
         function renderForm() {
             const form = document.getElementById('crud-form');
             form.innerHTML = '';
-            
-            const fields = {
-                "Artigo": ["titulo", "ano", "sourche_title", "qt_citacoes", "doi", "issn", "link"],
-                "Autores": ["Nome"],
-                "Palavras Chave": ["Palavras_Chaves"],
-                "Referências": ["Referencia"]
-            };
-
-            fields[currentEntity].forEach(field => {
-                form.innerHTML += `
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 capitalize">${field.replace('_', ' ')}</label>
-                        <input type="text" id="field-${field}" class="mt-1 block w-full border rounded-md p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                `;
+            fieldsMap[currentEntity].forEach(field => {
+                form.innerHTML += `<div><label class="block text-sm font-medium text-gray-700 capitalize">${field.replace('_', ' ')}</label>
+                <input type="text" id="field-${field}" class="mt-1 block w-full border rounded-md p-2 shadow-sm"></div>`;
             });
         }
 
         function saveData() {
             const entry = { id: db[currentEntity].length + 1 };
-            const inputs = document.querySelectorAll('#crud-form input');
-            inputs.forEach(input => {
-                const key = input.id.replace('field-', '');
-                entry[key] = input.value;
+            fieldsMap[currentEntity].forEach(field => {
+                entry[field] = document.getElementById(`field-${field}`).value;
             });
-            
             db[currentEntity].push(entry);
-            alert("Registro salvo!");
+            alert("Salvo!");
             renderTable();
             switchTab('listar');
         }
@@ -143,25 +121,23 @@
             head.innerHTML = '<th class="p-3 text-left">ID</th>';
             body.innerHTML = '';
 
-            if (db[currentEntity].length > 0) {
-                const columns = Object.keys(db[currentEntity][0]).filter(k => k !== 'id');
-                columns.forEach(col => head.innerHTML += `<th class="p-3 text-left capitalize">${col}</th>`);
-                head.innerHTML += '<th class="p-3 text-left">Ações</th>';
+            const fields = fieldsMap[currentEntity];
+            fields.forEach(f => head.innerHTML += `<th class="p-3 text-left capitalize">${f}</th>`);
+            head.innerHTML += '<th class="p-3 text-left">Ações</th>';
 
+            if (db[currentEntity].length > 0) {
                 db[currentEntity].forEach(row => {
                     let tr = `<td class="p-3">${row.id}</td>`;
-                    columns.forEach(col => tr += `<td class="p-3">${row[col]}</td>`);
-                    tr += `<td class="p-3"><button onclick="deleteData(${row.id})" class="text-red-600 hover:underline">Excluir</button></td>`;
+                    fields.forEach(f => tr += `<td class="p-3">${row[f] || ''}</td>`);
+                    tr += `<td class="p-3"><button onclick="deleteData(${row.id})" class="text-red-600">Excluir</button></td>`;
                     body.innerHTML += `<tr>${tr}</tr>`;
                 });
             } else {
-                body.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhum dado cadastrado.</td></tr>';
+                body.innerHTML = '<tr><td colspan="10" class="p-4 text-center">Vazio</td></tr>';
             }
         }
 
-        // Inicialização
-        renderForm();
-        renderTable();
+        window.onload = () => { renderForm(); renderTable(); };
     </script>
 </body>
 </html>
