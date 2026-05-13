@@ -1,143 +1,593 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Análise de Dados</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .active-btn { background-color: #2563eb !important; color: white !important; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análise de Dados</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161d;
+      --surface2: #1a1e28;
+      --border: #252a38;
+      --border2: #313749;
+      --accent: #4f6ef7;
+      --accent-dim: #2d3f8f;
+      --accent-glow: rgba(79,110,247,0.15);
+      --green: #22c97b;
+      --green-dim: rgba(34,201,123,0.1);
+      --red: #f75f5f;
+      --red-dim: rgba(247,95,95,0.1);
+      --text: #e8eaf0;
+      --text2: #7b8299;
+      --text3: #454d65;
+      --font-display: 'Syne', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    aside {
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-header .logo {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .sidebar-header .logo span {
+      color: var(--accent);
+    }
+
+    .sidebar-header .subtitle {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    nav {
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+    }
+
+    .nav-section {
+      font-size: 10px;
+      color: var(--text3);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 12px 8px 6px;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text2);
+      background: transparent;
+      transition: all 0.15s;
+      text-align: left;
+    }
+
+    .nav-btn:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .nav-btn.active {
+      background: var(--accent-glow);
+      color: var(--accent);
+      border: 1px solid var(--accent-dim);
+    }
+
+    .nav-btn .icon {
+      font-size: 14px;
+      width: 16px;
+      flex-shrink: 0;
+    }
+
+    .nav-btn .badge {
+      margin-left: auto;
+      font-size: 10px;
+      background: var(--surface2);
+      color: var(--text3);
+      padding: 1px 6px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .nav-btn.active .badge {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border-color: var(--accent-dim);
+    }
+
+    /* Main */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Topbar */
+    .topbar {
+      padding: 0 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0;
+      height: 52px;
+    }
+
+    .topbar-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-right: 24px;
+    }
+
+    .topbar-title .entity {
+      color: var(--accent);
+    }
+
+    .tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 16px;
+      height: 52px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text3);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+      margin-bottom: -1px;
+    }
+
+    .tab-btn:hover { color: var(--text2); }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* Content */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px;
+    }
+
+    /* Table */
+    .table-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .table-info {
+      font-size: 11px;
+      color: var(--text3);
+      letter-spacing: 0.06em;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: transparent;
+      color: var(--text2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      transition: all 0.15s;
+    }
+    .btn-ghost:hover { border-color: var(--accent-dim); color: var(--text); }
+
+    .table-wrap {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    thead {
+      background: var(--surface);
+    }
+
+    th {
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 500;
+      color: var(--text3);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 11px 14px;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      max-width: 180px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tbody tr { transition: background 0.1s; }
+    tbody tr:hover td { background: var(--surface); }
+
+    .td-id {
+      color: var(--text3);
+      font-size: 11px;
+      width: 32px;
+    }
+
+    .btn-delete {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text3);
+      padding: 4px 6px;
+      border-radius: 4px;
+      transition: all 0.15s;
+      font-size: 13px;
+    }
+    .btn-delete:hover { background: var(--red-dim); color: var(--red); }
+
+    .empty-state {
+      text-align: center;
+      padding: 52px 0;
+    }
+    .empty-state .icon { font-size: 28px; margin-bottom: 10px; color: var(--text3); }
+    .empty-state p { color: var(--text3); font-size: 12px; }
+
+    /* Form */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      max-width: 640px;
+    }
+
+    .form-grid.single { grid-template-columns: 1fr; }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 11px;
+      color: var(--text2);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .field input {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 9px 12px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      width: 100%;
+    }
+
+    .field input::placeholder { color: var(--text3); }
+    .field input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+      max-width: 640px;
+    }
+
+    .feedback {
+      margin-top: 12px;
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: none;
+      max-width: 640px;
+    }
+    .feedback.ok { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,201,123,0.2); display: flex; }
+    .feedback.err { background: var(--red-dim); color: var(--red); border: 1px solid rgba(247,95,95,0.2); display: flex; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* Tab panels */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+  </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body>
 
-    <div class="flex h-screen">
-        <!-- Menu Lateral -->
-        <aside class="w-64 bg-slate-800 text-white p-6 shadow-xl">
-            <h2 class="text-xl font-bold mb-8 border-b border-slate-700 pb-4">Menu de Navegação</h2>
-            <nav class="space-y-2">
-                <button onclick="switchEntity('Artigo')" id="nav-Artigo" class="w-full text-left p-3 rounded hover:bg-slate-700 transition active-btn">Artigo</button>
-                <button onclick="switchEntity('Autores')" id="nav-Autores" class="w-full text-left p-3 rounded hover:bg-slate-700 transition">Autores</button>
-                <button onclick="switchEntity('Palavras Chave')" id="nav-Palavras" class="w-full text-left p-3 rounded hover:bg-slate-700 transition">Palavras Chave</button>
-                <button onclick="switchEntity('Referências')" id="nav-Referências" class="w-full text-left p-3 rounded hover:bg-slate-700 transition">Referências</button>
-            </nav>
-        </aside>
+  <aside>
+    <div class="sidebar-header">
+      <div class="logo">data<span>.</span>lab</div>
+      <div class="subtitle">Sistema de análise</div>
+    </div>
+    <nav>
+      <div class="nav-section">Entidades</div>
+      <button class="nav-btn active" onclick="switchEntity('Artigo')" id="nav-Artigo">
+        <span class="icon">◈</span> Artigo
+        <span class="badge" id="badge-Artigo">0</span>
+      </button>
+      <button class="nav-btn" onclick="switchEntity('Autores')" id="nav-Autores">
+        <span class="icon">◉</span> Autores
+        <span class="badge" id="badge-Autores">0</span>
+      </button>
+      <button class="nav-btn" onclick="switchEntity('Palavras Chave')" id="nav-Palavras Chave">
+        <span class="icon">◆</span> Palavras-chave
+        <span class="badge" id="badge-Palavras Chave">0</span>
+      </button>
+      <button class="nav-btn" onclick="switchEntity('Referências')" id="nav-Referências">
+        <span class="icon">◇</span> Referências
+        <span class="badge" id="badge-Referências">0</span>
+      </button>
+    </nav>
+  </aside>
 
-        <!-- Área Principal -->
-        <main class="flex-1 p-10 overflow-y-auto">
-            <h1 class="text-3xl font-extrabold text-gray-800 mb-6">📊 ANALISE DE DADOS</h1>
-            
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 id="current-title" class="text-2xl font-semibold mb-6 text-blue-600">Gerenciar Artigo</h2>
-
-                <!-- Tabs -->
-                <div class="flex border-b mb-6">
-                    <button onclick="switchTab('listar')" id="tab-btn-listar" class="py-2 px-4 border-b-2 border-blue-600 text-blue-600 font-medium">📋 Listar</button>
-                    <button onclick="switchTab('inserir')" id="tab-btn-inserir" class="py-2 px-4 border-transparent border-b-2 hover:text-blue-600 transition">➕ Inserir</button>
-                </div>
-
-                <div id="tab-listar" class="tab-content active">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-white">
-                            <thead class="bg-gray-50 border-b">
-                                <tr id="table-head"></tr>
-                            </thead>
-                            <tbody id="table-body" class="divide-y"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="tab-inserir" class="tab-content">
-                    <form id="crud-form" class="grid grid-cols-1 md:grid-cols-2 gap-4"></form>
-                    <button onclick="saveData()" class="mt-6 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">Salvar Registro</button>
-                </div>
-            </div>
-        </main>
+  <main>
+    <div class="topbar">
+      <div class="topbar-title">
+        <span class="entity" id="entity-label">artigo</span>
+      </div>
+      <button class="tab-btn active" onclick="switchTab('listar')" id="tab-btn-listar">
+        ▤ Listar
+      </button>
+      <button class="tab-btn" onclick="switchTab('inserir')" id="tab-btn-inserir">
+        ＋ Inserir
+      </button>
     </div>
 
-    <script>
-        let db = { "Artigo": [], "Autores": [], "Palavras Chave": [], "Referências": [] };
-        let currentEntity = "Artigo";
+    <div class="content">
 
-        const fieldsMap = {
-            "Artigo": ["titulo", "ano", "sourche_title", "qt_citacoes", "doi", "issn", "link"],
-            "Autores": ["Nome"],
-            "Palavras Chave": ["Palavras_Chaves"],
-            "Referências": ["Referencia"]
-        };
+      <!-- LIST -->
+      <div class="tab-panel active" id="tab-listar">
+        <div class="table-toolbar">
+          <span class="table-info" id="row-count">— 0 REGISTROS</span>
+          <button class="btn-primary" onclick="switchTab('inserir')">＋ Novo registro</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr id="table-head"></tr></thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </div>
 
-        function switchEntity(entity) {
-            currentEntity = entity;
-            document.querySelectorAll('aside button').forEach(btn => btn.classList.remove('active-btn'));
-            
-            // Simplificado para evitar erros de ID
-            const safeId = "nav-" + entity.replace(" Chave", ""); 
-            const btn = document.getElementById("nav-" + entity);
-            if(btn) btn.classList.add('active-btn');
+      <!-- INSERT -->
+      <div class="tab-panel" id="tab-inserir">
+        <div id="crud-form" class="form-grid"></div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="saveData()">✓ Salvar registro</button>
+          <button class="btn-ghost" onclick="clearForm()">Limpar campos</button>
+        </div>
+        <div class="feedback" id="feedback"></div>
+      </div>
 
-            document.getElementById('current-title').innerText = `Gerenciar ${entity}`;
-            renderForm();
-            renderTable();
-            switchTab('listar');
-        }
+    </div>
+  </main>
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(`tab-${tab}`).classList.add('active');
-            document.querySelectorAll('[id^="tab-btn-"]').forEach(b => b.classList.remove('border-blue-600', 'text-blue-600'));
-            document.getElementById(`tab-btn-${tab}`).classList.add('border-blue-600', 'text-blue-600');
-        }
+  <script>
+    let db = { "Artigo": [], "Autores": [], "Palavras Chave": [], "Referências": [] };
+    let currentEntity = "Artigo";
 
-        function renderForm() {
-            const form = document.getElementById('crud-form');
-            form.innerHTML = '';
-            fieldsMap[currentEntity].forEach(field => {
-                form.innerHTML += `<div><label class="block text-sm font-medium text-gray-700 capitalize">${field.replace('_', ' ')}</label>
-                <input type="text" id="field-${field}" class="mt-1 block w-full border rounded-md p-2 shadow-sm"></div>`;
-            });
-        }
+    const fieldsMap = {
+      "Artigo": [
+        { key: "titulo", label: "Título" },
+        { key: "ano", label: "Ano" },
+        { key: "source_title", label: "Source title" },
+        { key: "qt_citacoes", label: "Qtd. citações" },
+        { key: "doi", label: "DOI" },
+        { key: "issn", label: "ISSN" },
+        { key: "link", label: "Link" }
+      ],
+      "Autores": [{ key: "nome", label: "Nome" }],
+      "Palavras Chave": [{ key: "palavra_chave", label: "Palavra-chave" }],
+      "Referências": [{ key: "referencia", label: "Referência" }]
+    };
 
-        function saveData() {
-            const entry = { id: db[currentEntity].length + 1 };
-            fieldsMap[currentEntity].forEach(field => {
-                entry[field] = document.getElementById(`field-${field}`).value;
-            });
-            db[currentEntity].push(entry);
-            alert("Salvo!");
-            renderTable();
-            switchTab('listar');
-        }
+    function switchEntity(entity) {
+      currentEntity = entity;
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('nav-' + entity).classList.add('active');
+      document.getElementById('entity-label').textContent = entity.toLowerCase();
+      renderForm();
+      renderTable();
+      switchTab('listar');
+    }
 
-        function deleteData(id) {
-            db[currentEntity] = db[currentEntity].filter(item => item.id !== id);
-            renderTable();
-        }
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-btn-' + tab).classList.add('active');
+    }
 
-        function renderTable() {
-            const head = document.getElementById('table-head');
-            const body = document.getElementById('table-body');
-            head.innerHTML = '<th class="p-3 text-left">ID</th>';
-            body.innerHTML = '';
+    function renderForm() {
+      const fields = fieldsMap[currentEntity];
+      const isSingle = fields.length === 1;
+      const form = document.getElementById('crud-form');
+      form.className = 'form-grid' + (isSingle ? ' single' : '');
+      form.innerHTML = fields.map(f =>
+        `<div class="field">
+          <label for="field-${f.key}">${f.label}</label>
+          <input type="text" id="field-${f.key}" placeholder="—">
+        </div>`
+      ).join('');
+    }
 
-            const fields = fieldsMap[currentEntity];
-            fields.forEach(f => head.innerHTML += `<th class="p-3 text-left capitalize">${f}</th>`);
-            head.innerHTML += '<th class="p-3 text-left">Ações</th>';
+    function clearForm() {
+      fieldsMap[currentEntity].forEach(f => {
+        const el = document.getElementById('field-' + f.key);
+        if (el) el.value = '';
+      });
+      hideFeedback();
+    }
 
-            if (db[currentEntity].length > 0) {
-                db[currentEntity].forEach(row => {
-                    let tr = `<td class="p-3">${row.id}</td>`;
-                    fields.forEach(f => tr += `<td class="p-3">${row[f] || ''}</td>`);
-                    tr += `<td class="p-3"><button onclick="deleteData(${row.id})" class="text-red-600">Excluir</button></td>`;
-                    body.innerHTML += `<tr>${tr}</tr>`;
-                });
-            } else {
-                body.innerHTML = '<tr><td colspan="10" class="p-4 text-center">Vazio</td></tr>';
-            }
-        }
+    function showFeedback(msg, ok) {
+      const el = document.getElementById('feedback');
+      el.textContent = msg;
+      el.className = 'feedback ' + (ok ? 'ok' : 'err');
+      clearTimeout(el._t);
+      el._t = setTimeout(hideFeedback, 2800);
+    }
 
-        window.onload = () => { renderForm(); renderTable(); };
-    </script>
+    function hideFeedback() {
+      document.getElementById('feedback').className = 'feedback';
+    }
+
+    function saveData() {
+      const fields = fieldsMap[currentEntity];
+      const entry = { id: Date.now() };
+      let hasValue = false;
+      fields.forEach(f => {
+        const val = (document.getElementById('field-' + f.key) || {}).value || '';
+        entry[f.key] = val.trim();
+        if (val.trim()) hasValue = true;
+      });
+      if (!hasValue) { showFeedback('Preencha pelo menos um campo antes de salvar.', false); return; }
+      db[currentEntity].push(entry);
+      updateBadge(currentEntity);
+      clearForm();
+      showFeedback('Registro salvo com sucesso.', true);
+      renderTable();
+      setTimeout(() => switchTab('listar'), 900);
+    }
+
+    function deleteData(id) {
+      db[currentEntity] = db[currentEntity].filter(r => r.id !== id);
+      updateBadge(currentEntity);
+      renderTable();
+    }
+
+    function updateBadge(entity) {
+      document.getElementById('badge-' + entity).textContent = db[entity].length;
+    }
+
+    function renderTable() {
+      const fields = fieldsMap[currentEntity];
+      const rows = db[currentEntity];
+      const head = document.getElementById('table-head');
+      const body = document.getElementById('table-body');
+
+      document.getElementById('row-count').textContent = `— ${rows.length} REGISTRO${rows.length !== 1 ? 'S' : ''}`;
+
+      head.innerHTML =
+        `<th style="width:36px;">#</th>` +
+        fields.map(f => `<th>${f.label}</th>`).join('') +
+        `<th style="width:52px;"></th>`;
+
+      if (rows.length === 0) {
+        body.innerHTML = `<tr><td colspan="${fields.length + 2}">
+          <div class="empty-state">
+            <div class="icon">◈</div>
+            <p>Nenhum registro em <strong>${currentEntity}</strong></p>
+          </div>
+        </td></tr>`;
+      } else {
+        body.innerHTML = rows.map((row, i) =>
+          `<tr>
+            <td class="td-id">${i + 1}</td>
+            ${fields.map(f => `<td title="${row[f.key] || ''}">${row[f.key] || '—'}</td>`).join('')}
+            <td>
+              <button class="btn-delete" onclick="deleteData(${row.id})" title="Excluir">✕</button>
+            </td>
+          </tr>`
+        ).join('');
+      }
+    }
+
+    renderForm();
+    renderTable();
+  </script>
 </body>
 </html>
