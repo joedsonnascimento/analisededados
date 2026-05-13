@@ -1,0 +1,99 @@
+import streamlit as st
+import pandas as pd
+
+# Configuração da página
+st.set_page_config(page_title="Análise de Dados", layout="wide")
+
+# Título Principal conforme solicitado
+st.title("📊 ANALISE DE DADOS")
+
+# Menu Lateral (Baseado nos botões solicitados)
+st.sidebar.header("Menu de Navegação")
+menu = st.sidebar.radio(
+    "Selecione uma categoria:",
+    ("Artigo", "Autores", "Palavras Chave", "Referências")
+)
+
+# --- Funções de Dados (Refletindo o modelo ATIVIDADE JOEDSON.jpg) ---
+def inicializar_db():
+    if 'db' not in st.session_state:
+        st.session_state.db = {
+            "Artigo": pd.DataFrame(columns=[
+                "ID", "titulo", "ano", "sourche_title", "qt_citacoes", 
+                "doi", "link", "resumo", "issn", "liguagens", 
+                "tipo_documento", "stagio_publicacao", "tipo_access"
+            ]),
+            "Autores": pd.DataFrame(columns=["ID", "Nome"]),
+            "Palavras Chave": pd.DataFrame(columns=["ID", "Palavras_Chaves"]),
+            "Referências": pd.DataFrame(columns=["ID", "Referencia"])
+        }
+
+inicializar_db()
+df = st.session_state.db[menu]
+
+# --- Interface CRUD ---
+st.header(f"Gerenciar {menu}")
+
+tab_visualizar, tab_incluir, tab_editar = st.tabs(["📋 Listar", "➕ Inserir", "⚙️ Alterar/Excluir"])
+
+with tab_visualizar:
+    st.subheader(f"Registros de {menu}")
+    if df.empty:
+        st.info(f"Nenhum registro encontrado em {menu}.")
+    else:
+        st.dataframe(df, use_container_width=True)
+
+with tab_incluir:
+    st.subheader(f"Novo Registro em {menu}")
+    with st.form(f"form_add_{menu}", clear_on_submit=True):
+        
+        # Mapeamento de campos baseado no arquivo ATIVIDADE JOEDSON.jpg
+        if menu == "Artigo":
+            c1, c2 = st.columns(2)
+            titulo = c1.text_input("Título (titulo)")
+            ano = c2.number_input("Ano (ano)", min_value=1900, max_value=2026, value=2024)
+            source = c1.text_input("Fonte (sourche_title)")
+            citacoes = c2.number_input("Citações (qt_citacoes)", min_value=0)
+            doi = c1.text_input("DOI")
+            issn = c2.text_input("ISSN")
+            link = st.text_input("Link")
+            resumo = st.text_area("Resumo")
+            
+            c3, c4, c5 = st.columns(3)
+            lang = c3.text_input("Linguagens")
+            tipo_doc = c4.text_input("Tipo Documento")
+            tipo_acc = c5.selectbox("Tipo Acesso", ["Open Access", "Closed", "Other"])
+            
+            novo_dado = {
+                "ID": len(df) + 1, "titulo": titulo, "ano": ano, "sourche_title": source,
+                "qt_citacoes": citacoes, "doi": doi, "link": link, "resumo": resumo,
+                "issn": issn, "liguagens": lang, "tipo_documento": tipo_doc,
+                "stagio_publicacao": "Final", "tipo_access": tipo_acc
+            }
+        
+        elif menu == "Autores":
+            nome = st.text_input("Nome do Autor")
+            novo_dado = {"ID": len(df) + 1, "Nome": nome}
+            
+        elif menu == "Palavras Chave":
+            palavra = st.text_input("Palavra-Chave (Palavras_Chaves)")
+            novo_dado = {"ID": len(df) + 1, "Palavras_Chaves": palavra}
+            
+        elif menu == "Referências":
+            ref = st.text_area("Texto da Referência (Referencia)")
+            novo_dado = {"ID": len(df) + 1, "Referencia": ref}
+
+        if st.form_submit_button("Salvar Registro"):
+            st.session_state.db[menu] = pd.concat([df, pd.DataFrame([novo_dado])], ignore_index=True)
+            st.success("Dados salvos com sucesso!")
+            st.rerun()
+
+with tab_editar:
+    if not df.empty:
+        id_selecionado = st.selectbox("Selecione o ID para remover", df["ID"])
+        if st.button("🗑️ Excluir Registro Selecionado", type="primary"):
+            st.session_state.db[menu] = df[df["ID"] != id_selecionado]
+            st.warning("Registro removido com sucesso.")
+            st.rerun()
+    else:
+        st.write("Banco de dados vazio.")
